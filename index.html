@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>色弱遊戲</title>
+    <style>
+        * {
+            box-sizing: border-box;
+           
+        }
+
+        body {
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100vh;
+            background-color: bisque;
+            display: flex;
+            /* flex-direction: column; */
+            justify-content: center;
+            align-items: center;
+        }
+
+        #box {
+            width: 525px;
+            height: 525px;
+            background-color: white;
+            margin: 20px auto;
+            border-radius: 15px;
+            display: flex;
+            flex-wrap: wrap;
+
+            padding: 3px;
+        }
+
+        #box.none {
+            display: none;
+        }
+
+        .box {
+            /* width: calc(calc(100% / 2) - 6px);
+            height: calc(calc(100% / 2) - 6px); */
+            margin: 3px;
+            /* height: calc(50% - 6px); */
+            /* background-color: brown; */
+            border-radius: 5%;
+            cursor: pointer;
+        }
+
+        /* .answer {
+            opacity: 0.6;
+        } */
+
+        .content {
+            width: 525px;
+            height: 100px;
+            margin: 0px auto;
+            padding: 0px 12px;
+            /* background-color: black; */
+            /* border: 1px solid #000; */
+            display: flex;
+            justify-content: space-between;
+
+
+        }
+
+        .button {
+            width: 525px;
+            height: 100px;
+            margin: 0px auto;
+            /* background-color: black; */
+            /* border: 1px solid #000; */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .content .time {
+            width: 100px;
+            height: 100px;
+            font-size: 40px;
+            text-align: center;
+            line-height: 100px;
+            border-radius: 20px;
+            background-color: #becaff;
+
+        }
+
+        .content .score {
+            width: 150px;
+            height: 100px;
+            background-color: #bee4ff;
+            border-radius: 20px;
+            font-size: 40px;
+            text-align: center;
+            line-height: 100px;
+        
+        }
+
+        #start {
+            font-size: 72px;
+            cursor: pointer;
+
+        }
+
+        #start:hover {
+            opacity: 0.65;
+        }
+
+        .none {
+            display: none;
+
+        }
+
+        .time-btn {
+            font-size: 32px;
+            padding: 15px;
+            cursor: pointer;
+            /* background-color: burlywood; */
+            box-shadow: inset 0 0 0 0 burlywood;
+            border-radius: 10px;
+            
+        }
+
+        .time-btn:hover{
+            box-shadow: inset 158px 0 0 0 burlywood;
+            transition: 0.3s;
+        }
+
+        #container .text {
+            width: 525px;
+            margin: 0 auto;
+            font-size: 72px;
+            text-align: center;
+            position: absolute;
+            top: 200px;
+        }
+
+        .end-score {
+            font-size: 40px;
+            
+        }
+
+        .end-score span {
+            font-weight: bold;
+        }
+
+        .end-box {
+            width: 100%;
+            height: 100vh;
+            padding-top: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            
+        }
+
+        .again {
+            display: inline-block;
+            font-size: 32px;
+            padding: 10px;
+            cursor: pointer;
+            box-shadow: inset 0 0 0 0 burlywood;
+            border-radius: 10px;
+        }
+
+        .again:hover{
+            box-shadow: inset 158px 0 0 0 burlywood;
+            transition: 0.3s;
+        }
+
+        .comments{
+            font-size: 40px;
+            margin:  40px 0px;
+            font-weight: bold;
+            /* border: thick double #32a1ce; */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="start" onclick="startgame()">開始遊戲</div>
+    <div id="container" class="none">
+        <div class="text none">畫面已暫停</div>
+        <div class="content">
+            <div class="time">45</div>
+            <div class="score"></div>
+        </div>
+        <div id="box"></div>
+        <div class="button">
+            <div class="time-btn" onclick="control_time()">暫停遊戲</div>
+        </div>
+    </div>
+    <div id="end" class="none">
+        <div class="end-box">
+            <div class="end-score">經過測驗,您的分數是: <span></span></div>
+            <div class="comments"></div>
+            <div class="again" onclick="again()">再來一次</div>
+        </div>
+    </div>
+
+
+    <script>
+        const box = document.querySelector('#box')
+        const container = document.querySelector('#container')
+        const start = document.querySelector('#start')
+        const endgame = document.querySelector('#end')
+        const score_box = document.querySelector('.score')
+        const time_box = document.querySelector('.time')
+        const time_btn = document.querySelector('.time-btn')
+        const content = document.querySelector('.content')
+        const text = document.querySelector('.text')
+        const end_score = document.querySelector('.end-score span')
+        const comments = document.querySelector('.comments')
+        
+
+        let score = -1//分數
+        let level = 1//等級
+        let time = 45//時間
+        let op = 0.6//透明度
+        let tag = true
+        let timer
+
+        
+
+
+        function startgame() {//點擊開始遊戲進入遊戲畫面並開始計時
+
+            start.classList.add('none')
+            container.classList.remove('none')
+            timer = setInterval(function () {
+                if (time > 0) {//開始計時
+
+                    time--
+                    time_box.textContent = time
+                } else {//時間歸零結算
+                    end()
+                }
+                if(time <= 5){
+                    time_box.style.color = 'red'
+                }
+
+            }, 1000)//每1000毫秒執行一次
+        }
+
+        function control_time() {//控制時間暫停或繼續
+            if (tag) {//如果回傳ture就停止計時
+                clearInterval(timer)//停止計時
+                content.classList.add('none')
+                box.classList.add('none')
+                text.classList.remove('none')
+                time_btn.textContent = '繼續遊戲'
+                tag = false
+            } else {//如果回傳false就重新開始計時 time值已更動過
+                timer = setInterval(function () {
+                    if (time > 0) {
+
+                        time--
+                        time_box.textContent = time
+                    } else {
+                        end()
+                    }
+
+                }, 1000)
+                content.classList.remove('none')
+                box.classList.remove('none')
+                text.classList.add('none')
+                time_btn.textContent = '暫停遊戲'
+                tag = true
+            }
+        }
+
+        function reset() {//生成色弱方塊
+            score++
+            score_box.textContent = "分數:" + score
+            
+            box.innerHTML = ''//清空
+
+            let a = -1//測定值
+            let math_random = Math.floor(Math.random() * ((level + 1) ** 2))//產生亂數
+            let r_random = Math.floor(Math.random() * 220)
+            let g_random = Math.floor(Math.random() * 220)
+            let b_random = Math.floor(Math.random() * 220)
+
+            while(a == math_random){//避免亂數與上一個重複 如果數字重複就重骰
+                math_random = Math.floor(Math.random() * ((level + 1) ** 2))
+            }
+            a = math_random//將數字放入當作下一個亂數的測定值
+
+            for (let i = 0; i < (level + 1) ** 2; i++) {//加入方塊
+                if (i == math_random) {
+                    box.innerHTML +=
+                        `<div class="box answer" onclick = "reset()" style="opacity:${op}"></div>`
+                } else {
+                    box.innerHTML +=
+                        `<div class="box"></div>`
+                }
+
+            }
+
+            
+            const boxes = document.querySelectorAll('.box')//新增箱子變數
+            
+
+            boxes.forEach(function (box) {//計算方塊大小與填入顏色
+                box.style.backgroundColor = `rgb(${r_random},${g_random},${b_random})`;
+                box.style.width = `calc(calc(100% / ${level + 1}) - 6px`;
+                box.style.height = `calc(calc(100% / ${level + 1}) - 6px`;
+
+            })
+
+            if (score % 3 == 0) {//提升難度
+                if (level < 9) {
+                    level++
+                    op = op + 0.035
+                }
+            }
+        }
+
+        function end() {//時間到時出現提示並顯示結算畫面
+            clearInterval(timer)
+            let time_out = alert('時間到了喔')
+            container.classList.add('none')
+            endgame.classList.remove('none')
+            end_score.textContent = score
+            if(score < 15){
+                comments.textContent = '快去檢查眼睛吧'
+            }else if(score < 25){
+                comments.textContent = '你有輕微色弱但不影響生活'
+            }else if(score < 40){
+                comments.textContent = '恭喜你你眼睛很健康'
+            }else if(score < 60){
+                comments.textContent = '你是大神吧'
+            }
+        }
+
+        function again() {//再次遊玩  回復預設值並顯示開始畫面
+            score = -1
+            level = 1
+            time = 45
+            op = 0.6
+            tag = true
+            score_box.textContent = "分數:" + score
+            time_box.textContent = '30'
+            start.classList.remove('none')
+            endgame.classList.add('none')
+            time_box.style.color = ''
+            reset()
+        }
+
+        reset()
+
+
+    </script>
+</body>
+
+</html>
